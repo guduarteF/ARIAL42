@@ -13,10 +13,10 @@ public class placar : NetworkBehaviour
     
    public Text placarText;
 
-   // [SyncVar]
-   //public int enemypoints;
-   // [SyncVar]
-   //public int playerpoints;
+   
+   public int enemypoints;
+   
+   public int playerpoints;
 
 
 
@@ -30,18 +30,18 @@ public class placar : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-       
+        PlacarText();
     }
 
 
    
-    //public void PlacarText()
-    //{ 
+    public void PlacarText()
+    { 
         
-    //    placarText.text = playerpoints + "x" + enemypoints;
+        placarText.text = playerpoints + "x" + enemypoints;
         
        
-    //}
+    }
 
    
 

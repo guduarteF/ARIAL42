@@ -301,10 +301,15 @@ MonoBehaviour:
   spawnPoint: {fileID: 3406150184406892558}
   mesh: {fileID: 7818821262738489808}
   cilindermesh: {fileID: 9043182778195278260}
-  isPlayer1: 0
-  placarText: {fileID: 0}
-  enemypoints: 0
-  playerpoints: 0
+  spawnp1: {fileID: 3820642226326669605, guid: 78277de349230bf4b82a61ce03dd5169, type: 3}
+  spawnp2: {fileID: 8798718070297378405, guid: 65ee8de6a307e9944a72ea4af1dbe3bb, type: 3}
+  spawn_blue_flag: {fileID: 6081858059203194430, guid: db8c019da4c7fb244aa2917560bce435,
+    type: 3}
+  spawn_red_flag: {fileID: 1446665349884717134, guid: beb8e02ea29d6fc438a53bb63dc184f3,
+    type: 3}
+  blueflag: {fileID: 2515534000835653089, guid: f3045bfeae11551458995a18d4f8cbb8,
+    type: 3}
+  redflag: {fileID: 4400896193955574092, guid: 2d28ce538fd8a1443909fda160019d1f, type: 3}
 --- !u!54 &1042095094557112598
 Rigidbody:
   m_ObjectHideFlags: 0

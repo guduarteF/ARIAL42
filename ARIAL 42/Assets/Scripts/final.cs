@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Networking.NetworkSystem;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+
 public class final : NetworkBehaviour
 {
     #region variaveis
@@ -56,16 +57,18 @@ public class final : NetworkBehaviour
     // public GameObject player2;
     // public GameObject spawnp2;
     // private bool morreu;  
-    private bool col_blue_base,col_red_base;
- 
-    private string _ID;
+    public static bool col_blue_base,col_red_base;
+    private bool blue_flag_captured, red_flag_captured;
+    public string _ID;
     public bool isPlayer1;
+    public  Transform spawnp1, spawnp2, spawn_blue_flag, spawn_red_flag;
+    public GameObject blueflag, redflag;
+    public static bool roundover;
+    public static bool restartplayerpos;
 
    
 
-    [SyncVar(hook = "enemyPoint")] public int enemypoints;
-
-    //[SyncVar(hook = "CmdUpdatePlacar")] public int playerpoints;
+   
 
 
 
@@ -87,7 +90,6 @@ public class final : NetworkBehaviour
         deploymentHeight = 45f;
         velocity = 30f;
      
-        //RpcSpawnBandeiras();
 
         _ID = "" + GetComponent<NetworkIdentity>().netId;
         Debug.Log(_ID);
@@ -96,28 +98,35 @@ public class final : NetworkBehaviour
 
     private void Update()
     {
-        
-      
-
-
+        if(isPlayer1 == true)
+        {
+            if (restartplayerpos == true)
+            {
+                gameObject.transform.position = spawnp1.position;
+            }
+        }
+        else
+        {
+            if (restartplayerpos == true)
+            {
+                gameObject.transform.position = spawnp2.position;
+            }
+        }
+       
+        Debug.Log(roundover);
+        #region Update
         if (isLocalPlayer)
         {
-            if (Input.GetKeyUp(KeyCode.E) && Time.time > time_between_shoots)
+            if (Input.GetKeyUp(KeyCode.E) && Time.time > time_between_shoots && roundover == false)
             {
                 time_between_shoots = Time.time + fire_rate;
                 CmdAtirar();
-            }
 
-
-            if (isPlayer1 == true && Input.GetKeyUp(KeyCode.G))
-            {
-               // playerpoints++;
-               // CmdUpdatePlacar();
-            }
-            if (isPlayer1 == false && Input.GetKeyUp(KeyCode.F))
+            }   
+            
+            if(Input.GetKeyUp(KeyCode.R))
             {
                 
-                CmdUpdatePlacar();
             }
 
         }
@@ -127,7 +136,7 @@ public class final : NetworkBehaviour
 
 
        
-            if (int.Parse(_ID) % 2 == 0)
+            if (int.Parse(_ID) % 2 == 1)
             {
                 GetComponent<MeshRenderer>().material.color = Color.red;
                 transform.gameObject.tag = "Player2";
@@ -145,24 +154,23 @@ public class final : NetworkBehaviour
 
 
        
-            if (col_blue_base == true && isPlayer1 == false)
+            if (col_blue_base == true && isPlayer1 == false && roundover == false)
             {
                 GameObject bandeira_azul = GameObject.Find("Blueflag");
                 bandeira_azul.GetComponent<Rigidbody>().MovePosition(gameObject.transform.position);
+                blue_flag_captured = true;
+                 Debug.Log("1");
             }
             
-            if(col_red_base == true && isPlayer1 == true)
+            if(col_red_base == true && isPlayer1 == true && roundover == false)
             {
                 GameObject bandeira_vermelha = GameObject.Find("Redflag");
                 bandeira_vermelha.GetComponent<Rigidbody>().MovePosition(gameObject.transform.position);
-            }
+                red_flag_captured = true;
+                Debug.Log("2");
+        }
 
-        
-        
-
-
-
-
+        #endregion
 
 
     }
@@ -176,7 +184,7 @@ public class final : NetworkBehaviour
         {
 
 
-            if (terminocenter == true && ismovingA == false && ismovingD == false && ismovingS == false && ismovingW == false)
+            if (terminocenter == true && ismovingA == false && ismovingD == false && ismovingS == false && ismovingW == false && roundover == false)
             {
 
                 if (Input.GetKey(KeyCode.W) && Physics.Raycast(transform.position, Vector3.forward, out pontoDeColisao1, deploymentHeight, points) && ismovingD == false && ismovingA == false && ismovingS == false && ismovingD == false && ismovingW == false)
@@ -326,8 +334,6 @@ public class final : NetworkBehaviour
         }
         #endregion
 
-
-
         #region POWERUP 
 
 
@@ -371,16 +377,34 @@ public class final : NetworkBehaviour
     #region TRIGGER
     private void OnTriggerEnter(Collider other)
     {
+       
 
-
-        if (other.gameObject.CompareTag("bluebase"))
+        if (other.gameObject.CompareTag("bluebase") && !isPlayer1)
         {
             col_blue_base = true;
         }
 
-        if(other.gameObject.CompareTag("redbase"))
+        if (other.gameObject.CompareTag("bluebase") && red_flag_captured == true)
+        {
+            red_flag_captured = false;
+            col_red_base = false;
+            placar.p.playerpoints++;         
+            StartCoroutine(restart_Game());
+            Debug.Log("3");
+        }
+
+        if (other.gameObject.CompareTag("redbase") && isPlayer1)
         {
             col_red_base = true;
+        }
+        if (other.gameObject.CompareTag("redbase") && blue_flag_captured == true)
+        {
+
+            blue_flag_captured = false;
+            col_blue_base = false;
+            placar.p.enemypoints++;
+            StartCoroutine(restart_Game());
+            Debug.Log("4");
         }
 
         if (other.gameObject.CompareTag("center"))
@@ -406,23 +430,10 @@ public class final : NetworkBehaviour
 
 
         }
-
        
 
 
-
-
-        //    if(isServer)
-        //{
-        //    if (other.gameObject.CompareTag("flagA") && flagcaptured == true)
-        //    {
-        //        placar.playerpoints++;
-        //        SceneManager.LoadScene(1);
-        //        part.transform.position = gameObject.transform.position;
-        //        part.Play();
-        //    }
-        //}
-
+     
 
         //if (other.gameObject.CompareTag("shieldPU"))
         //{
@@ -464,6 +475,26 @@ public class final : NetworkBehaviour
     }
     #endregion
 
+    IEnumerator restart_Game()
+    {
+        GameObject bandeira_azul = GameObject.Find("Blueflag");
+        GameObject bandeira_vermelha = GameObject.Find("Redflag");
+
+        roundover = true;
+        col_blue_base = false;
+        col_red_base = false;
+        yield return new WaitForSeconds(1f);
+
+        restartplayerpos = true;
+
+        bandeira_azul.GetComponent<Rigidbody>().MovePosition(spawn_blue_flag.position);
+        bandeira_vermelha.GetComponent<Rigidbody>().MovePosition(spawn_red_flag.position);
+       
+        StartCoroutine(delay());
+            Debug.Log("6");
+        
+
+    }
 
 
     [Command]
@@ -474,44 +505,7 @@ public class final : NetworkBehaviour
 
     }
 
-    //[ClientRpc]
-    //public void RpcSpawnBandeiras()
-    //{
-    //    GameObject clonebv = (GameObject)Instantiate(bandeiraVermelha, bv_Spawn.transform.position, Quaternion.identity);
-    //    GameObject cloneba = (GameObject)Instantiate(bandeiraAzul, ba_Spawn.transform.position, Quaternion.identity);
-    //}
-
-      
-
-        [Command]
-        public void CmdUpdatePlacar()
-        {
-        enemypoints++;
-        
-        }
-        void enemyPoint(int pe)
-        {
-            enemypoints = pe;
-
-            if (isLocalPlayer)
-            {
-                GameObject.Find("placar").transform.Find("Text").GetComponent<Text>().text = "x" + enemypoints;
-            }
-        }
-        
-
-    //    [Command]
-    //    public void CmdUpdatePlacar2(int pp)
-    //{
-    //    placar.p.placarText.text = 
-    //}
-
-
-
-
-
-
-
+    
 
     [ClientRpc]
 
@@ -560,7 +554,13 @@ public class final : NetworkBehaviour
     //    speeddown = false;
     //    Debug.Log("stun false");
     //}
-
+    IEnumerator delay()
+    {
+        yield return new WaitForSeconds(1.5f);
+        roundover =false;
+        restartplayerpos = false;
+        Debug.Log("7");
+    }
    
 
 
