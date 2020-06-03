@@ -58,7 +58,7 @@ public class final : NetworkBehaviour
     // public GameObject spawnp2;
     // private bool morreu;  
     public static bool col_blue_base,col_red_base;
-    private bool blue_flag_captured, red_flag_captured;
+    private static bool blue_flag_captured, red_flag_captured;
     public string _ID;
     public bool isPlayer1;
     public  Transform spawnp1, spawnp2, spawn_blue_flag, spawn_red_flag;
@@ -98,6 +98,7 @@ public class final : NetworkBehaviour
 
     private void Update()
     {
+
         if (col_blue_base == false)
         {
             GameObject bandeira_azul = GameObject.Find("Blueflag");
@@ -125,16 +126,10 @@ public class final : NetworkBehaviour
             }
         }
 
-        if(isLocalPlayer)
-        {
-            if (Input.GetKeyUp(KeyCode.R))
-            {
-                velocity = 60f;
-            }
-        }
+      
       
        
-        Debug.Log(roundover);
+        
         #region Update
         if (isLocalPlayer)
         {
@@ -154,7 +149,7 @@ public class final : NetworkBehaviour
 
 
        
-            if (int.Parse(_ID) % 2 == 1)
+            if (int.Parse(_ID) % 2 == 0)
             {
                 GetComponent<MeshRenderer>().material.color = Color.red;
                 transform.gameObject.tag = "Player2";
@@ -174,20 +169,20 @@ public class final : NetworkBehaviour
 
 
 
-            if (col_blue_base == true && isPlayer1 == false && roundover == false)
+            if (col_blue_base == true && !isPlayer1 && roundover == false)
             {
-                GameObject bandeira_azul = GameObject.Find("Blueflag");
-                bandeira_azul.GetComponent<Rigidbody>().MovePosition(gameObject.transform.position);
-                blue_flag_captured = true;
-                Debug.Log("1");
+                    GameObject bandeira_azul = GameObject.Find("Blueflag");
+                    bandeira_azul.GetComponent<Rigidbody>().MovePosition(gameObject.transform.position);
+                    blue_flag_captured = true;
+                
             }
 
-            if (col_red_base == true && isPlayer1 == true && roundover == false)
+            if (col_red_base == true && isPlayer1 && roundover == false)
             {
                 GameObject bandeira_vermelha = GameObject.Find("Redflag");
                 bandeira_vermelha.GetComponent<Rigidbody>().MovePosition(gameObject.transform.position);
                 red_flag_captured = true;
-                Debug.Log("2");
+              
             }
         
         #endregion
@@ -397,17 +392,22 @@ public class final : NetworkBehaviour
     #region TRIGGER
     private void OnTriggerEnter(Collider other)
     {
-       
+        if(other.gameObject.CompareTag("speed"))
+        {
+            velocity = velocity + 10f;
+            other.gameObject.GetComponent<MeshRenderer>().enabled = false;
+        }
 
         if (other.gameObject.CompareTag("bluebase") && !isPlayer1)
         {
             col_blue_base = true;
         }
 
-        if (other.gameObject.CompareTag("bluebase") && red_flag_captured == true)
+        if (other.gameObject.CompareTag("bluebase") && red_flag_captured == true && isPlayer1)
         {
-            red_flag_captured = false;
+           
             col_red_base = false;
+            red_flag_captured = false;
             placar.p.playerpoints++;         
             StartCoroutine(restart_Game());
             Debug.Log("3");
@@ -417,11 +417,10 @@ public class final : NetworkBehaviour
         {
             col_red_base = true;
         }
-        if (other.gameObject.CompareTag("redbase") && blue_flag_captured == true)
+        if (other.gameObject.CompareTag("redbase") && blue_flag_captured == true && !isPlayer1)
         {
-
-            blue_flag_captured = false;
             col_blue_base = false;
+            blue_flag_captured = false;        
             placar.p.enemypoints++;
             StartCoroutine(restart_Game());
             Debug.Log("4");
@@ -436,55 +435,36 @@ public class final : NetworkBehaviour
         if (other.gameObject.CompareTag("bala"))
         {
 
-            //if(isPlayer1)
-            //{
-            if (gameObject.GetComponent<MeshRenderer>().material.color == Color.red)
+            
+            if (!isPlayer1)
             {
                 roundover = true;
                 ismovingW = false;
                 ismovingA = false;
                 ismovingS = false;
                 ismovingD = false;
-                StartCoroutine(delay());
-                gameObject.transform.position = spawnp2.position;
                 col_blue_base = false;
+                blue_flag_captured = false;
+                gameObject.transform.position = spawnp2.position;   
+                StartCoroutine(delay());
 
-                if (col_blue_base == true)
-                {
-
-                    col_blue_base = false;
-
-
-
-                }
             }
                
 
             
 
-            if(gameObject.GetComponent<MeshRenderer>().material.color == Color.blue)
+            if(isPlayer1)
             {
 
                 roundover = true;
                 ismovingW = false;
                 ismovingA = false;
                 ismovingS = false;
-                ismovingD = false;
-                StartCoroutine(delay());
-                gameObject.transform.position = spawnp1.position;
+                ismovingD = false;            
                 col_red_base = false;
-
-
-
-                if (col_red_base == true)
-                {
-
-                    col_red_base = false;
-                }
-
-               
-                  
-                
+                red_flag_captured = false;
+                gameObject.transform.position = spawnp1.position;
+                StartCoroutine(delay());
 
             }
 
@@ -602,25 +582,25 @@ public class final : NetworkBehaviour
     }
  
 
-    [ClientRpc]
+   // [ClientRpc]
 
-   public void RpcMorte()
-   {
-        //     morreu = true;
-        //     if (isServer)
-        //     {
-        //         placar.enemypoints++;
-        //     }
-      //  GameObject partclone = (GameObject)Instantiate(partgo, transform.position, Quaternion.identity);
-        //part.transform.position = gameObject.transform.position;
-        //NetworkServer.Spawn(partclone);
-        //part.Play();
-       //     velocity = 0;
-       //     StartCoroutine(menuManager.RestartDelay());
-     mesh.enabled = false;
-     cilindermesh.enabled = false;
+   //public void RpcMorte()
+   //{
+   //     //     morreu = true;
+   //     //     if (isServer)
+   //     //     {
+   //     //         placar.enemypoints++;
+   //     //     }
+   //   //  GameObject partclone = (GameObject)Instantiate(partgo, transform.position, Quaternion.identity);
+   //     //part.transform.position = gameObject.transform.position;
+   //     //NetworkServer.Spawn(partclone);
+   //     //part.Play();
+   //    //     velocity = 0;
+   //    //     StartCoroutine(menuManager.RestartDelay());
+   //  mesh.enabled = false;
+   //  cilindermesh.enabled = false;
         
-   }
+   //}
 
     #region IENUMERATOR
     //IEnumerator speedI()

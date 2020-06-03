@@ -13,6 +13,7 @@ TagManager:
   - center
   - Player2
   - bala2
+  - speed
   layers:
   - Default
   - TransparentFX
