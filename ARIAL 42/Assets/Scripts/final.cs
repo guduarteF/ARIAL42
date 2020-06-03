@@ -98,7 +98,19 @@ public class final : NetworkBehaviour
 
     private void Update()
     {
-        if(isPlayer1 == true)
+        if (col_blue_base == false)
+        {
+            GameObject bandeira_azul = GameObject.Find("Blueflag");
+            bandeira_azul.GetComponent<Rigidbody>().MovePosition(spawn_blue_flag.position);
+        }
+
+        if (col_red_base == false)
+        {
+            GameObject bandeira_vermelha = GameObject.Find("Redflag");
+            bandeira_vermelha.GetComponent<Rigidbody>().MovePosition(spawn_red_flag.position);
+        }
+
+        if (isPlayer1 == true)
         {
             if (restartplayerpos == true)
             {
@@ -112,6 +124,15 @@ public class final : NetworkBehaviour
                 gameObject.transform.position = spawnp2.position;
             }
         }
+
+        if(isLocalPlayer)
+        {
+            if (Input.GetKeyUp(KeyCode.R))
+            {
+                velocity = 60f;
+            }
+        }
+      
        
         Debug.Log(roundover);
         #region Update
@@ -124,10 +145,7 @@ public class final : NetworkBehaviour
 
             }   
             
-            if(Input.GetKeyUp(KeyCode.R))
-            {
-                
-            }
+           
 
         }
 
@@ -149,27 +167,29 @@ public class final : NetworkBehaviour
 
             }
 
-        
 
 
 
-       
+
+
+
+
             if (col_blue_base == true && isPlayer1 == false && roundover == false)
             {
                 GameObject bandeira_azul = GameObject.Find("Blueflag");
                 bandeira_azul.GetComponent<Rigidbody>().MovePosition(gameObject.transform.position);
                 blue_flag_captured = true;
-                 Debug.Log("1");
+                Debug.Log("1");
             }
-            
-            if(col_red_base == true && isPlayer1 == true && roundover == false)
+
+            if (col_red_base == true && isPlayer1 == true && roundover == false)
             {
                 GameObject bandeira_vermelha = GameObject.Find("Redflag");
                 bandeira_vermelha.GetComponent<Rigidbody>().MovePosition(gameObject.transform.position);
                 red_flag_captured = true;
                 Debug.Log("2");
-        }
-
+            }
+        
         #endregion
 
 
@@ -241,7 +261,7 @@ public class final : NetworkBehaviour
 
         #region movement
 
-        if (isLocalPlayer)
+        if (isLocalPlayer && roundover == false)
         {
             if (ismovingW == true)
             {
@@ -416,24 +436,96 @@ public class final : NetworkBehaviour
         if (other.gameObject.CompareTag("bala"))
         {
 
-            RpcMorte();
+            //if(isPlayer1)
+            //{
+            if (gameObject.GetComponent<MeshRenderer>().material.color == Color.red)
+            {
+                roundover = true;
+                ismovingW = false;
+                ismovingA = false;
+                ismovingS = false;
+                ismovingD = false;
+                StartCoroutine(delay());
+                gameObject.transform.position = spawnp2.position;
+                col_blue_base = false;
 
-            ////    if(shield == false)
-            ////    {
+                if (col_blue_base == true)
+                {
 
-            ////    }
-            ////    else
-            ////    {
-            ////        shield = false;
-            ////        shieldSphere.SetActive(false);
-            ////    }
+                    col_blue_base = false;
+
+
+
+                }
+            }
+               
+
+            
+
+            if(gameObject.GetComponent<MeshRenderer>().material.color == Color.blue)
+            {
+
+                roundover = true;
+                ismovingW = false;
+                ismovingA = false;
+                ismovingS = false;
+                ismovingD = false;
+                StartCoroutine(delay());
+                gameObject.transform.position = spawnp1.position;
+                col_red_base = false;
+
+
+
+                if (col_red_base == true)
+                {
+
+                    col_red_base = false;
+                }
+
+               
+                  
+                
+
+            }
+
+          
+
+            //}
+            //else
+            //{
+            //if (other.GetComponent<MeshRenderer>().material.color == Color.blue)
+            //{
+
+
+            // }
+            //}
+
+            //if(other.gameObject.GetComponent<MeshRenderer>().material.color == Color.red)
+            //{
+
+            //}
+            // if(other.gameObject.GetComponent<MeshRenderer>().material.color == Color.blue)
+            // {
+
+            // }
+
+
+
 
 
         }
+
        
 
+        
 
-     
+
+
+
+
+
+
+
 
         //if (other.gameObject.CompareTag("shieldPU"))
         //{
@@ -483,6 +575,10 @@ public class final : NetworkBehaviour
         roundover = true;
         col_blue_base = false;
         col_red_base = false;
+        ismovingW = false;
+        ismovingA = false;
+        ismovingS = false;
+        ismovingD = false;
         yield return new WaitForSeconds(1f);
 
         restartplayerpos = true;
@@ -502,10 +598,9 @@ public class final : NetworkBehaviour
     {
         GameObject clonebullet = (GameObject)Instantiate(bala, spawnPoint.transform.position, spawnPoint.transform.rotation);
         NetworkServer.Spawn(clonebullet);
-
+     
     }
-
-    
+ 
 
     [ClientRpc]
 

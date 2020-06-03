@@ -12,6 +12,7 @@ TagManager:
   - flagA
   - center
   - Player2
+  - bala2
   layers:
   - Default
   - TransparentFX
