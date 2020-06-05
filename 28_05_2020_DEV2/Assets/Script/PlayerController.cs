@@ -36,7 +36,11 @@ public class PlayerController : NetworkBehaviour
             }
         }
        
-
+        if(Input.GetKeyUp(KeyCode.R))
+        {
+            ChangeScene();
+        }
+            
 
      
     }
@@ -98,5 +102,8 @@ public class PlayerController : NetworkBehaviour
         Destroy(bala, 2);
     }
 
-
+    void ChangeScene()
+    {
+        NetworkManager.singleton.ServerChangeScene("teste");
+    }
 }
