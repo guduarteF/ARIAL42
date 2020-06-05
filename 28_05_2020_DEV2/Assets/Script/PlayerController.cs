@@ -5,11 +5,16 @@ using UnityEngine.Networking;
 
 public class PlayerController : NetworkBehaviour
 {
+    [SyncVar]
+    int vida = 5;
+    public GameObject bullet;
+    public Transform bullet_pos;
+   
 
     // Start is called before the first frame update
     void Start()
     {
-       
+      
     }
 
     // Update is called once per frame
@@ -23,6 +28,14 @@ public class PlayerController : NetworkBehaviour
             transform.Translate(0, 0, v);
         }
 
+        if(isLocalPlayer)
+        {
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                CmdFire();
+            }
+        }
+       
 
 
      
@@ -46,6 +59,16 @@ public class PlayerController : NetworkBehaviour
           
 
         }
+
+        if(collision.gameObject.CompareTag("bala"))
+        {
+            vida--;
+            if(vida==0)
+            {
+                gameObject.SetActive(false);
+                gameover.g.canvas.SetActive(true);
+            }
+        }
        
       
         
@@ -65,7 +88,15 @@ public class PlayerController : NetworkBehaviour
 
     }
   
-    
+    [Command]
+    void CmdFire()
+    {
+        GameObject bala = (GameObject)Instantiate(bullet, bullet_pos.position, bullet_pos.rotation);
+
+        bala.GetComponent<Rigidbody>().velocity = bala.transform.forward * 10;
+        NetworkServer.Spawn(bala);
+        Destroy(bala, 2);
+    }
 
 
 }
